@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+  xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:p="http://www.springframework.org/schema/p"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+              http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<!-- Initializing our main beans -->
+	
+	<bean id="calculationImpl" class="com.noah.CalculationImpl"/>
+	<bean id="resourceMonitor" class="com.noah.ResourceMonitor"/>
+	
+	<!-- Initializing the advice bean -->
+	<bean id="calculationAdvice" class="com.noah.CalculationAdvice">
+		<property name="resourceMonitor" ref="resourceMonitor" />
+	</bean>
+	
+	<!-- Initializing proxy bean, which enables AOP capabilities on top of a regular bean. -->
+	<bean id="calculationProxy" class = "org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target"> <!-- The main bean this proxy should contain -->
+			<ref bean="calculationImpl"/>
+		</property>
+		<property name="interfaces"> <!-- The interface that belong to the target bean -->
+			<value>com.noah.Calculation</value>
+		</property>
+		<property name="interceptorNames"> <!-- The interceptors that this proxy will utilize, defined below -->
+			<list>
+				<value>calcAllAdvice</value>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="calcAllAdvice" class = "org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+		<property name="advice"> <!-- This sets this Interceptors advice bean to the one defined at the top of the file -->
+			<ref bean="calculationAdvice"/>
+		</property>
+		<property name="pattern">
+			<value> com.noah.*.*(..) </value>
+		</property>
+	</bean>
+</beans>
